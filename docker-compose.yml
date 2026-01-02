@@ -1,0 +1,26 @@
+services:
+  utsulog-st:
+    build: .
+    container_name: utsulog-st
+    working_dir: /app
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    volumes:
+      # 現在のディレクトリをコンテナ内の /app にマウント
+      - .:/app
+      # Hugging Faceのモデルキャッシュを永続化（再ダウンロード防止）
+      - hf_cache:/root/.cache/huggingface
+    # 起動し続けるように設定
+    tty: true
+    stdin_open: true
+    # GPUを使用するための設定 (NVIDIA Container Toolkitが必要)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
+
+volumes:
+  hf_cache:
