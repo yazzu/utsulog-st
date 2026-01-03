@@ -2,13 +2,13 @@ import webvtt
 import sys
 import os
 
-def to_chunk(vtt_file, lines_per_chunk=30):
+def to_chunk(vtt_file):
     if not os.path.exists(vtt_file):
         print(f"Error: File {vtt_file} not found.")
         return
 
     basename = os.path.splitext(os.path.basename(vtt_file))[0]
-    output_file = f"{basename}_chunks.txt"
+    output_file = f"{basename}_strip.txt"
 
     text_lines = []
     
@@ -26,16 +26,13 @@ def to_chunk(vtt_file, lines_per_chunk=30):
 
     # Chunking
     with open(output_file, 'w', encoding='utf-8') as f:
-        for i in range(0, len(text_lines), lines_per_chunk):
-            chunk = text_lines[i:i + lines_per_chunk]
-            f.write('\n'.join(chunk) + '\n\n') # Add extra newline between chunks
+        f.write('\n'.join(text_lines))
 
     print(f"Created {output_file} with {len(text_lines)} lines.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python to_chunk.py <vtt_file> [lines_per_chunk]")
+        print("Usage: python to_strip.py <vtt_file>")
     else:
         vtt_file = sys.argv[1]
-        lines_per_chunk = int(sys.argv[2]) if len(sys.argv) > 2 else 30
-        to_chunk(vtt_file, lines_per_chunk)
+        to_chunk(vtt_file)

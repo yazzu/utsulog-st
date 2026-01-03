@@ -18,11 +18,11 @@ YouTube Liveの文字起こし
 - Whisperのモデル: large-v3
 - 言語: 日本語
 
-3. VTTファイルからテキスト抽出: to_chunk.py
+3. VTTファイルからテキスト抽出: to_strip.py
 
 - PythonでVTTを読み込む: webvtt-py ライブラリなどを使用。
-- テキストのみ抽出 & チャンク化: タイムスタンプを除外し、テキストを20〜30行ごとのブロック（チャンク）にまとめる。
-- 出力ファイル: {元のbasename}_chunks.txt
+- テキストのみ抽出: タイムスタンプを除外し、テキストをまとめる。
+- 出力ファイル: {元のbasename}_strip.txt
 
 4. Geminiに修正依頼: generate_content.py
 
@@ -30,8 +30,12 @@ YouTube Liveの文字起こし
 - model: gemini-3-flash-preview
 - 用語リスト: wordlist.txt
 - APIキー: GEMINI_API_KEY
-- 入力ファイル: {元のbasename}_chunks.txt
+- 入力ファイル: {元のbasename}_strip.txt
+    - 3000行ごとのブロックに分けて修正依頼する
+    - 切れ目が発生するため ２回目以降は 50行をオーバーラップさせる
 - 出力ファイル: {元のbasename}_fixed.txt
+    - 修正されたテキストを結合して出力する
+    - 重複するオーバーラップ部分は削除する
 - prompt: prompt.txt
 
 5. 修正結果をVTTに書き戻す: revert_vtt.py

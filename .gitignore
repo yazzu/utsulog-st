@@ -1,2 +1,7 @@
+__pycache__/
+*.pyc
+.env
+.venv/
+.cache/
 instraction.txt
 test/*
