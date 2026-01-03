@@ -22,6 +22,7 @@ YouTube Liveの文字起こし
 
 - PythonでVTTを読み込む: webvtt-py ライブラリなどを使用。
 - テキストのみ抽出: タイムスタンプを除外し、テキストをまとめる。
+- 行の先頭にアンカーの行番号 [L0001] を出力する
 - 出力ファイル: {元のbasename}_strip.txt
 
 4. Geminiに修正依頼: generate_content.py
@@ -43,3 +44,5 @@ YouTube Liveの文字起こし
 - 修正結果をVTTに書き戻す: 修正されたテキストを元のVTT構造に戻して保存する。
 - 入力ファイル: {元のbasename}_fixed.txt
 - 出力ファイル: {元のbasename}_fixed.vtt
+- to_strip.pyで作成したファイルと比較して、欠けた行番号の行を補完する
+- 入力ファイル: {元のbasename}_strip.txt

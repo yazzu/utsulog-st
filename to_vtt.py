@@ -7,6 +7,14 @@ def to_vtt(mp3_file):
         print(f"Error: File {mp3_file} not found.")
         return
 
+    basename = os.path.splitext(os.path.basename(mp3_file))[0]
+    output_file = f"{basename}.vtt"
+    if os.path.exists(output_file):
+        print(f"スキップ: {output_file} (すでに存在します)")
+        return
+
+    print(f"Processing {mp3_file}")
+
     model = stable_whisper.load_faster_whisper('large-v3')
     result = model.transcribe(mp3_file,
         language='ja',
@@ -22,8 +30,6 @@ def to_vtt(mp3_file):
         beam_size=5
     )
 
-    basename = os.path.splitext(os.path.basename(mp3_file))[0]
-    output_file = f"{basename}.vtt"    
     try:
         result.to_srt_vtt(output_file, word_level=False)
     except AttributeError as e:

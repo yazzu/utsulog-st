@@ -68,7 +68,7 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         ),
     ]
 
-    LINES_PER_CHUNK = 3000
+    LINES_PER_CHUNK = 2500
     OVERLAP_LINES = 50
 
     total_lines = len(lines)

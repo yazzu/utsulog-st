@@ -24,11 +24,16 @@ def to_chunk(vtt_file):
         print(f"Error reading VTT file: {e}")
         return
 
+    # Add line numbers
+    numbered_lines = []
+    for i, line in enumerate(text_lines):
+        numbered_lines.append(f"[L{i+1:04d}] {line}")
+
     # Chunking
     with open(output_file, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(text_lines))
+        f.write('\n'.join(numbered_lines))
 
-    print(f"Created {output_file} with {len(text_lines)} lines.")
+    print(f"Created {output_file} with {len(numbered_lines)} lines.")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
