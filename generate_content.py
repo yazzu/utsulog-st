@@ -1,5 +1,6 @@
 import os
 import sys
+import time
 from google import genai
 from google.genai import types
 
@@ -11,6 +12,7 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
     if not os.path.exists(prompt_file):
         print(f"Error: Prompt file {prompt_file} not found.")
         return
+    
     # wordlist might be optional or empty, but specified in requirements
     wordlist_content = ""
     if os.path.exists(wordlist_file):
@@ -67,9 +69,6 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
     print("Initializing Gemini Client...")
     client = genai.Client(api_key=api_key)
 
-    print("Sending request to Gemini (gemini-3-flash-preview)...") 
-    target_model = "gemini-3-flash-preview" 
-
     # ゲーム実況などでは必須の設定
     safety_settings = [
         types.SafetySetting(
@@ -90,16 +89,19 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         ),
     ]
 
+    print("Request sent...")
+    start_time = time.time()  # 計測開始
     try:
         response = client.models.generate_content(
-            model=target_model,
+            model="gemini-3-flash-preview",
             contents=final_prompt,
             config=types.GenerateContentConfig(
-                temperature=0.1, # Low temperature for correction task
+                temperature=1, # Low temperature for correction task
                 top_p=0.95,
                 top_k=64,
                 safety_settings=safety_settings,
-                max_output_tokens=65536,
+                max_output_tokens=8192, # チャンク処理なら8192で十分かつ安全
+                response_mime_type="text/plain",
             )
         )
         
@@ -122,6 +124,12 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
 
     except Exception as e:
         print(f"Error during generation: {e}")
+
+    finally:
+        # 成功・失敗に関わらず時間を表示
+        end_time = time.time()
+        elapsed_time = end_time - start_time
+        print(f"Processing time: {elapsed_time:.2f} seconds")
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
