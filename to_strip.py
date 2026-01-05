@@ -27,7 +27,7 @@ def to_chunk(vtt_file):
     # Add line numbers
     numbered_lines = []
     for i, line in enumerate(text_lines):
-        numbered_lines.append(f"[L{i+1:04d}] {line}")
+        numbered_lines.append(f"{i+1:04d}-{line}")
 
     # Chunking
     with open(output_file, 'w', encoding='utf-8') as f:

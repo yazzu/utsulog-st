@@ -9,10 +9,9 @@ def parse_tagged_file(path):
     Returns a dictionary mapping 'L0001' -> 'Text content'
     """
     mapping = {}
-    # Matches [L0001] ... or [L123] ...
-    # Assumes single space after ] if present, but \s? handles optional space.
+    # Matches 0001-... or 123-...
     # We capture the content after the tag.
-    pattern = re.compile(r"^\[(L\d+)\]\s?(.*)")
+    pattern = re.compile(r"^(\d+)\-(.*)")
     
     try:
         with open(path, 'r', encoding='utf-8') as f:
@@ -78,7 +77,7 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
             continue
             
         original_strip_index += 1
-        tag = f"L{original_strip_index:04d}"
+        tag = f"{original_strip_index:04d}"
         
         if tag in fixed_map:
             # Update with fixed text

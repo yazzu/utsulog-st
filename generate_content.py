@@ -3,6 +3,7 @@ import sys
 import time
 from google import genai
 from google.genai import types
+from google.genai.types import HttpOptions
 
 def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordlist.txt'):
     # Check if files exist
@@ -27,6 +28,11 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         print("Error: GEMINI_API_KEY environment variable is not set.")
         return
 
+    TIMEOUT_SECONDS = os.environ.get("TIMEOUT_SECONDS")
+    if not TIMEOUT_SECONDS:
+        print("Warning: TIMEOUT_SECONDS environment variable is not set. Defaulting to 5 minutes.")
+        TIMEOUT_SECONDS = 5 * 60 * 1000 # 5 minutes
+
     # Read Input Content
     try:
         with open(input_file, 'r', encoding='utf-8') as f:
@@ -46,7 +52,7 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         return
 
     print("Initializing Gemini Client...")
-    client = genai.Client(api_key=api_key)
+    client = genai.Client(api_key=api_key, http_options=HttpOptions(timeout=TIMEOUT_SECONDS))
 
     # Safety settings
     safety_settings = [
@@ -136,6 +142,11 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
             fixed_lines_all.extend(fixed_chunk_lines)
 
         except Exception as e:
+            # Using string matching for timeout detection as specific exception classes might vary
+            if "timeout" in str(e).lower() or "deadline" in str(e).lower():
+                print(f"Error: Request timed out. Exiting with code 75.: {e}")
+                sys.exit(75)
+            
             print(f"Error during generation for chunk {chunk_count}: {e}")
             # Decide weather to ABORT, CONTINUE, or use original lines?
             # For now, append original lines as fallback or stop? 
