@@ -28,12 +28,15 @@ WORKDIR /app
 # --system フラグを使用してベースのPython環境に直接インストールします
 # Whisper関連: faster-whisper, stable-ts
 # Gemini関連: google-genai
+# Ginaz関連: ginza
 # その他: webvtt-py (VTT操作用)
 RUN uv pip install --system --no-cache \
     faster-whisper \
     stable-ts \
     google-genai \
-    webvtt-py
+    webvtt-py \
+    ginza \
+    ja_ginza
 
 # コンテナ起動時のデフォルトコマンド
 CMD ["bash"]

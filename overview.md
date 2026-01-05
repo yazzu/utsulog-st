@@ -2,6 +2,11 @@
 
 YouTube Liveの文字起こし
 
+## 環境
+
+docker-compose.yml の utsulog-st サービスでバッチを実行をする
+各種ライブラリは Dockerfile に定義されている
+
 ## 概要
 
 1. YouTube Liveの録画をmp3に変換: conv_audio.py
@@ -60,20 +65,17 @@ YouTube Liveの文字起こし
 - すでにvttファイルが存在する場合はスキップする
 - oomで止まってしまった場合は、スキップする
 
-7. vttファイルを整形するフローをバッチ処理する: batch_fix_vtt.py
+7. テキスト抽出のバッチ処理: batch_to_strip.py
 
-- 引数のフォルダからvttファイルを検索する
-- temporaryフォルダで作業をする
-    - to_strip.py で strip済みファイルを作成する
-        - 出力ファイル: {元のbasename}_strip.txt
-    - generate_content.pyで修正依頼する
-        - 入力ファイル: {元のbasename}_strip.txt
-        - 出力ファイル: {元のbasename}_fixed.txt
-    - revert_vtt.pyを呼びだしてvttファイルを整形する
-        - 入力ファイル: {元のbasename}.vtt
-        - 入力ファイル: {元のbasename}_fixed.txt
-        - 入力ファイル: {元のbasename}_strip.txt
-        - 出力ファイル: {元のbasename}_fixed.vtt
-    - 完成したvttファイルを元のフォルダにコピーする
-    - 作業用のtemporaryフォルダを削除する
+- 引数のfromフォルダからvttファイルを検索する
+- 引数のtoフォルダにテキスト抽出の結果を出力する
+- to_strip.pyを呼び出してテキスト抽出を行う
 
+8. 用語リストの作成: make_wordlist.py
+
+- Ginzaの形態素解析で、名詞のリストを作成する。
+- 引数のフォルダからtxtファイルを検索する
+- 各ファイルのテキストを結合して、名詞のリストを作成する
+    - 名詞以外は除外
+    - 一意のリスト
+- 出力ファイル: wordlist_all.txt

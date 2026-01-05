@@ -2,13 +2,17 @@ import webvtt
 import sys
 import os
 
-def to_chunk(vtt_file):
+def to_chunk(vtt_file, txt_file=None):
     if not os.path.exists(vtt_file):
         print(f"Error: File {vtt_file} not found.")
         return
 
     basename = os.path.splitext(os.path.basename(vtt_file))[0]
-    output_file = f"{basename}_strip.txt"
+    
+    if txt_file is None:
+        output_file = f"{basename}_strip.txt"
+    else:
+        output_file = txt_file
 
     text_lines = []
     
@@ -37,7 +41,8 @@ def to_chunk(vtt_file):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python to_strip.py <vtt_file>")
+        print("Usage: python to_strip.py <vtt_file> [txt_file]")
     else:
         vtt_file = sys.argv[1]
-        to_chunk(vtt_file)
+        txt_file = sys.argv[2] if len(sys.argv) > 2 else None
+        to_chunk(vtt_file, txt_file)
