@@ -5,15 +5,23 @@ from google import genai
 from google.genai import types
 from google.genai.types import HttpOptions
 
-def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordlist.txt'):
+def generate_content(input_file, system_instruction_file='system_instruction.txt', wordlist_file='wordlist.txt'):
     # Check if files exist
     if not os.path.exists(input_file):
         print(f"Error: Input file {input_file} not found.")
         return
-    if not os.path.exists(prompt_file):
-        print(f"Error: Prompt file {prompt_file} not found.")
+    if not os.path.exists(system_instruction_file):
+        print(f"Error: System instruction file {system_instruction_file} not found.")
         return
-    
+    # Save output
+    basename = os.path.splitext(os.path.basename(input_file))[0]
+    if basename.endswith('_strip'):
+            basename = basename[:-6]
+    output_file = os.path.join(os.path.dirname(input_file), f"{basename}_fixed.txt")
+    if os.path.exists(output_file):
+        print(f"Error: Output file {output_file} already exists.")
+        return
+
     # wordlist might be optional or empty, but specified in requirements
     wordlist_content = ""
     if os.path.exists(wordlist_file):
@@ -43,12 +51,12 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         print(f"Error reading input file: {e}")
         return
 
-    # Read Prompt
+    # Read System Instruction
     try:
-        with open(prompt_file, 'r', encoding='utf-8') as f:
-            prompt_template = f.read()
+        with open(system_instruction_file, 'r', encoding='utf-8') as f:
+            system_instruction = f.read()
     except Exception as e:
-        print(f"Error reading prompt file: {e}")
+        print(f"Error reading system instruction file: {e}")
         return
 
     print("Initializing Gemini Client...")
@@ -74,7 +82,7 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         ),
     ]
 
-    LINES_PER_CHUNK = 2500
+    LINES_PER_CHUNK = 2000
     OVERLAP_LINES = 50
 
     total_lines = len(lines)
@@ -85,34 +93,32 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
     start_index = 0
     chunk_count = 0
 
+    system_instruction = f"""
+{system_instruction}
+
+{wordlist_content}
+"""
+
     while start_index < total_lines:
         chunk_count += 1
         end_index = min(start_index + LINES_PER_CHUNK, total_lines)
         
         current_chunk_lines = lines[start_index:end_index]
-        input_text = "\n".join(current_chunk_lines)
+        prompt = "\n".join(current_chunk_lines)
 
         print(f"Processing Chunk {chunk_count}: Lines {start_index+1} to {end_index} ({len(current_chunk_lines)} lines)...")
-
-        final_prompt = f"""
-{prompt_template}
-
-{wordlist_content}
-
-# 対象テキスト
-{input_text}
-"""
 
         print(f"Request sent...")
         start_time = time.time()  # 計測開始
         try:
             response = client.models.generate_content(
                 model="gemini-3-flash-preview",
-                contents=final_prompt,
+                contents=prompt,
                 config=types.GenerateContentConfig(
                     temperature=1.0,
                     top_p=0.95,
                     top_k=64,
+                    system_instruction=system_instruction,
                     safety_settings=safety_settings,
                     response_mime_type="text/plain",
                 )
@@ -177,12 +183,6 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
         if start_index >= end_index: 
              start_index = end_index # Force progress if config is bad
 
-    # Save output
-    basename = os.path.splitext(os.path.basename(input_file))[0]
-    if basename.endswith('_chunks'):
-            basename = basename[:-7]
-    
-    output_file = f"{basename}_fixed.txt"
     
     with open(output_file, 'w', encoding='utf-8') as f:
         f.write("\n".join(fixed_lines_all))
@@ -191,9 +191,9 @@ def generate_content(input_file, prompt_file='prompt.txt', wordlist_file='wordli
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python generate_content.py <input_text_file> [prompt_file] [wordlist_file]")
+        print("Usage: python generate_content.py <input_text_file> [system_instruction_file] [wordlist_file]")
     else:
         input_file = sys.argv[1]
-        prompt_file = sys.argv[2] if len(sys.argv) > 2 else 'prompt.txt'
+        system_instruction_file = sys.argv[2] if len(sys.argv) > 2 else 'system_instruction.txt'
         wordlist_file = sys.argv[3] if len(sys.argv) > 3 else 'wordlist.txt'
-        generate_content(input_file, prompt_file, wordlist_file)
+        generate_content(input_file, system_instruction_file, wordlist_file)
