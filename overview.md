@@ -11,6 +11,8 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
 
 1. YouTube Liveの録画をmp3に変換: conv_audio.py
 
+- 入力ファイル：環境変数:VIDEOFILES_DIR配下のmp4ファイルを変換する
+- 出力ファイル: 環境変数:AUDIOS_DIR配下のmp3ファイル
 - オーディオコーデック: MP3
 - ビットレート: 64kbps
 - チャンネル: 1 (モノラル)
@@ -79,3 +81,20 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
     - 名詞以外は除外
     - 一意のリスト
 - 出力ファイル: wordlist_all.txt
+
+9. Gemini修正依頼のバッチ処理: batch_generate_content.py
+
+- 引数のfromフォルダから_strip.txtファイルを検索する
+- generate_content.pyを呼び出してテキスト抽出を行う
+
+10. 修正結果をVTTに書き戻す: batch_revert_vtt.py
+
+- 引数のfixedフォルダから_fixed.txtファイルを検索する
+    - 検索した_fixed.txtファイルと同名の_strip.txtファイルを検索する
+- 引数のvttフォルダから.vttファイルを検索する
+    - 検索した_strip.txtファイルと同名の.vttファイルを検索する
+- revert_vtt.pyを呼び出してVTTファイルを書き戻す
+    - original_vtt: 検索したvttファイル
+    - fixed_txt: 検索した_fixed.txtファイル
+    - strip_txt: 検索した_strip.txtファイル
+- 出力ファイル: {元のbasename}_fixed.vtt

@@ -39,6 +39,9 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
 
     basename = os.path.splitext(os.path.basename(original_vtt_path))[0]
     output_vtt_path = f"{basename}_fixed.vtt"
+    if os.path.exists(output_vtt_path):
+        print(f"Error: Output file {output_vtt_path} already exists.")
+        return
 
     # Infer strip path if not provided
     if not strip_txt_path:
@@ -49,7 +52,8 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
         strip_map = parse_tagged_file(strip_txt_path)
         if strip_map is None: return # Error reading
     else:
-        print(f"Warning: Strip file {strip_txt_path} not found. Cannot restore missing lines correctly.")
+        print(f"Error: Strip file {strip_txt_path} not found.")
+        return
 
     fixed_map = parse_tagged_file(fixed_txt_path)
     if fixed_map is None: return

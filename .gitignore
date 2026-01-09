@@ -8,4 +8,7 @@ instraction.txt
 test/*
 audios/*
 audios_bad/*
-vttfiles/*
+vtt/*
+vtt_bad/*
+vtt_fix/*
+wordlist_all.txt
