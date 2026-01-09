@@ -3,6 +3,8 @@ import sys
 import os
 import re
 
+RESTORED_COUNT_THRESHOLD = os.getenv("RESTORED_COUNT_THRESHOLD", 100)
+
 def parse_tagged_file(path):
     """
     Parses a file with lines like '[L0001] Text content'
@@ -38,14 +40,16 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
         return
 
     basename = os.path.splitext(os.path.basename(original_vtt_path))[0]
-    output_vtt_path = f"{basename}_fixed.vtt"
+    fixed_dir = os.path.dirname(os.path.abspath(fixed_txt_path))
+    output_vtt_path = os.path.join(fixed_dir, f"{basename}_fixed.vtt")
+    
     if os.path.exists(output_vtt_path):
         print(f"Error: Output file {output_vtt_path} already exists.")
         return
 
     # Infer strip path if not provided
     if not strip_txt_path:
-        strip_txt_path = f"{basename}_strip.txt"
+        strip_txt_path = os.path.join(fixed_dir, f"{basename}_strip.txt")
     
     strip_map = {}
     if os.path.exists(strip_txt_path):
@@ -96,6 +100,10 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
             # Not in fixed, not in strip. 
             # This implies the strip file provided doesn't match the VTT or something is wrong.
             skipped_count += 1
+
+    if restored_count > RESTORED_COUNT_THRESHOLD:
+        print(f"WARNING: Too many restored lines ({restored_count} > {RESTORED_COUNT_THRESHOLD}).skipped:{fixed_txt_path}")
+        return
 
     vtt.save(output_vtt_path)
     print(f"Saved to {output_vtt_path}")

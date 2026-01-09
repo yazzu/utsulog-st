@@ -5,6 +5,7 @@ __pycache__/
 .cache/
 .nv/
 instraction.txt
+*.log
 test/*
 audios/*
 audios_bad/*

@@ -54,9 +54,12 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
 - 修正結果をVTTに書き戻す: 修正されたテキストを元のVTT構造に戻して保存する。
 - 入力ファイル: {元のbasename}.vtt
 - 入力ファイル: {元のbasename}_fixed.txt
-- to_strip.pyで作成したファイルと比較して、行先頭のL{04d}. で欠けた行番号の行を補完する
+- to_strip.pyで作成したファイルと比較して、行先頭の{04d}- で欠けた行番号の行を補完する
 - 入力ファイル: {元のbasename}_strip.txt
 - 出力ファイル: {元のbasename}_fixed.vtt
+    - 出力フォルダは{元のbasename}_fixed.txtと同じ
+- 欠けた行が閾値100を超えた場合、処理をスキップ
+    - スキップしたことをWARNINGで出力する
 
 6. 文字起こしのバッチ処理: batch_to_vtt.py
 
@@ -86,6 +89,8 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
 
 - 引数のfromフォルダから_strip.txtファイルを検索する
 - generate_content.pyを呼び出してテキスト抽出を行う
+- generate_content.pyの出力をログファイルbatch_generate_content.logに保存する。
+    - loggingモジュールを使用する
 
 10. 修正結果をVTTに書き戻す: batch_revert_vtt.py
 
@@ -98,3 +103,5 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
     - fixed_txt: 検索した_fixed.txtファイル
     - strip_txt: 検索した_strip.txtファイル
 - 出力ファイル: {元のbasename}_fixed.vtt
+- 出力をログファイルbatch_revert_vtt.logに保存する。
+    - loggingモジュールを使用する
