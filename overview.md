@@ -29,7 +29,7 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
 
 - PythonでVTTを読み込む: webvtt-py ライブラリなどを使用。
 - テキストのみ抽出: タイムスタンプを除外し、テキストをまとめる。
-- 行の先頭にアンカーの行番号 L0001. を出力する
+- 行の先頭にアンカーの行番号 0001. を出力する
 - 出力ファイル: {元のbasename}_strip.txt
 
 4. Geminiに修正依頼: generate_content.py
