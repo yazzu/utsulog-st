@@ -105,3 +105,11 @@ docker-compose.yml の utsulog-st サービスでバッチを実行をする
 - 出力ファイル: {元のbasename}_fixed.vtt
 - 出力をログファイルbatch_revert_vtt.logに保存する。
     - loggingモジュールを使用する
+
+11. prepare_mv_videos.py
+
+- sambaネットワークフォルダから動画ファイルをVIDEOFILES_DIRにコピーする
+    - コピー元: \miniutsuro\share\utsulog-data\videofiles
+    - コピー先: VIDEOFILES_DIR
+    - コピーするファイル名: *.mp4
+    - コピー先にファイルが存在する場合はスキップする

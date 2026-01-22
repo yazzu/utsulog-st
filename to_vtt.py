@@ -2,13 +2,15 @@ import stable_whisper
 import os
 import sys
 
-def to_vtt(mp3_file):
+def to_vtt(mp3_file, output_file=None):
     if not os.path.exists(mp3_file):
         print(f"Error: File {mp3_file} not found.")
         return
 
-    basename = os.path.splitext(os.path.basename(mp3_file))[0]
-    output_file = f"{basename}.vtt"
+    if output_file is None:
+        basename = os.path.splitext(os.path.basename(mp3_file))[0]
+        output_file = f"{basename}.vtt"
+
     if os.path.exists(output_file):
         print(f"スキップ: {output_file} (すでに存在します)")
         return
@@ -36,9 +38,10 @@ def to_vtt(mp3_file):
         print(f"Failed to find saving methods: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 1:
-        print("Usage: python to_vtt.py <mp3_file>")
+    if len(sys.argv) < 2:
+        print("Usage: python to_vtt.py <mp3_file> [vtt_file]")
     else:
         mp3_file = sys.argv[1]
-        to_vtt(mp3_file)
+        vtt_file = sys.argv[2] if len(sys.argv) > 2 else None
+        to_vtt(mp3_file, vtt_file)
 

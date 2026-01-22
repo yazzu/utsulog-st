@@ -3,19 +3,24 @@ import sys
 import glob
 import subprocess
 
-def batch_to_vtt(target_dir):
-    if not os.path.isdir(target_dir):
-        print(f"Error: Directory {target_dir} not found.")
+def batch_to_vtt(mp3_dir, vtt_dir):
+    if not os.path.isdir(mp3_dir):
+        print(f"Error: Directory {mp3_dir} not found.")
         return
+
+    # Create output directory if it doesn't exist
+    if not os.path.exists(vtt_dir):
+        os.makedirs(vtt_dir)
+        print(f"Created output directory: {vtt_dir}")
 
     # Find all mp3 files in the target directory
-    mp3_files = glob.glob(os.path.join(target_dir, "*.mp3"))
+    mp3_files = glob.glob(os.path.join(mp3_dir, "*.mp3"))
     
     if not mp3_files:
-        print(f"No mp3 files found in {target_dir}")
+        print(f"No mp3 files found in {mp3_dir}")
         return
 
-    print(f"Found {len(mp3_files)} mp3 files in {target_dir}")
+    print(f"Found {len(mp3_files)} mp3 files in {mp3_dir}")
 
     # Get the directory where this script is located to find to_vtt.py
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -27,35 +32,25 @@ def batch_to_vtt(target_dir):
 
     for mp3_file in mp3_files:
         basename = os.path.splitext(os.path.basename(mp3_file))[0]
-        # vtt file is expected in the same directory as mp3
-        vtt_file = os.path.join(os.path.dirname(mp3_file), f"{basename}.vtt")
+        # vtt file is saved to the specified vtt_directory
+        vtt_file = os.path.join(vtt_dir, f"{basename}.vtt")
 
         if os.path.exists(vtt_file):
             print(f"Skip: {vtt_file} already exists.")
             continue
 
-        print(f"Processing: {mp3_file}")
+        print(f"Processing: {mp3_file} -> {vtt_file}")
         
         try:
             # Run to_vtt.py as a subprocess
-            # We pass the absolute path of the mp3 file
-            # cwd is set to the mp3 directory so to_vtt.py outputs there (as per its logic)
-            # Actually to_vtt.py logic: output_file = f"{basename}.vtt". 
-            # If we run it from a different dir, it might save in CWD.
-            # to_vtt.py uses:
-            # basename = os.path.splitext(os.path.basename(mp3_file))[0]
-            # output_file = f"{basename}.vtt"
-            # It saves to current working directory.
-            # So we should set cwd to the directory of the mp3 file.
-            
-            mp3_dir = os.path.dirname(mp3_file)
             mp3_abs_path = os.path.abspath(mp3_file)
+            vtt_abs_path = os.path.abspath(vtt_file)
             
             result = subprocess.run(
-                [sys.executable, to_vtt_script, mp3_abs_path],
-                cwd=mp3_dir,
-                capture_output=False, # Let stdout/stderr go to console
-                check=False # Don't raise exception on non-zero exit code immediately
+                [sys.executable, to_vtt_script, mp3_abs_path, vtt_abs_path],
+                cwd=mp3_dir, # cwd allows to_vtt.py to access local resources if needed, though arguments are absolute
+                capture_output=False,
+                check=False
             )
 
             if result.returncode != 0:
@@ -65,8 +60,9 @@ def batch_to_vtt(target_dir):
             print(f"Unexpected error processing {mp3_file}: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
-        print("Usage: python batch_to_vtt.py <directory>")
+    if len(sys.argv) < 3:
+        print("Usage: python batch_to_vtt.py <mp3_directory> <vtt_directory>")
     else:
-        target_dir = sys.argv[1]
-        batch_to_vtt(target_dir)
+        mp3_dir = sys.argv[1]
+        vtt_dir = sys.argv[2]
+        batch_to_vtt(mp3_dir, vtt_dir)
