@@ -4,10 +4,11 @@ import glob
 import subprocess
 import logging
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Valid log levels
 # DEBUG, INFO, WARNING, ERROR, CRITICAL
-LOG_FILE = "batch_generate_content.log"
+LOG_FILE = os.path.join(SCRIPT_DIR, "batch_generate_content.log")
 
 # Configure logging
 logging.basicConfig(
@@ -35,10 +36,9 @@ def batch_generate_content(from_dir):
     logging.info(f"Found {len(strip_files)} _strip.txt files in {from_dir}")
 
     # Get the directory where this script is located
-    script_dir = os.path.dirname(os.path.abspath(__file__))
-    generate_content_script = os.path.join(script_dir, "generate_content.py")
-    system_instruction_file = os.path.join(script_dir, "system_instruction.txt")
-    wordlist_file = os.path.join(script_dir, "wordlist.txt")
+    generate_content_script = os.path.join(SCRIPT_DIR, "generate_content.py")
+    system_instruction_file = os.path.join(SCRIPT_DIR, "system_instruction.txt")
+    wordlist_file = os.path.join(SCRIPT_DIR, "wordlist.txt")
 
     if not os.path.exists(generate_content_script):
         logging.error(f"Error: generate_content.py not found at {generate_content_script}")

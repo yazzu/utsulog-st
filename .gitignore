@@ -7,9 +7,11 @@ __pycache__/
 instraction.txt
 *.log
 test/*
-audios/*
-audios_bad/*
-vtt/*
-vtt_bad/*
-vtt_fix/*
-wordlist_all.txt
+data/audios/*
+data/bad_audios/*
+data/vtt/*
+data/videos/*
+data/vtt_bad/*
+data/vtt_fix/*
+data/json/*
+batch_wordlist/dictionary/*

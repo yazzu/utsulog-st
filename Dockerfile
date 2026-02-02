@@ -34,6 +34,7 @@ RUN uv pip install --system --no-cache \
     faster-whisper \
     stable-ts \
     google-genai \
+    pathvalidate \
     webvtt-py \
     ginza \
     ja_ginza

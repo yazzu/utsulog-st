@@ -194,6 +194,6 @@ if __name__ == "__main__":
         print("Usage: python generate_content.py <input_text_file> [system_instruction_file] [wordlist_file]")
     else:
         input_file = sys.argv[1]
-        system_instruction_file = sys.argv[2] if len(sys.argv) > 2 else 'system_instruction.txt'
-        wordlist_file = sys.argv[3] if len(sys.argv) > 3 else 'wordlist.txt'
+        system_instruction_file = sys.argv[2] if len(sys.argv) > 2 else 'batch_st/system_instruction.txt'
+        wordlist_file = sys.argv[3] if len(sys.argv) > 3 else 'batch_st/wordlist.txt'
         generate_content(input_file, system_instruction_file, wordlist_file)

@@ -4,6 +4,8 @@ import glob
 import subprocess
 import logging
 
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def batch_revert_vtt(fixed_dir, vtt_dir):
     # Check if directories exist
     if not os.path.isdir(fixed_dir):
@@ -100,7 +102,7 @@ def batch_revert_vtt(fixed_dir, vtt_dir):
 
 if __name__ == "__main__":
     # Configure logging
-    log_file = "batch_revert_vtt.log"
+    log_file = os.path.join(SCRIPT_DIR, "batch_revert_vtt.log")
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(levelname)s - %(message)s',
