@@ -71,3 +71,17 @@ python3 batch/batch_to_vtt.py /app/audios /app/vtt
 ## ライセンス
 
 [MIT License](LICENSE) (またはプロジェクトに適用されているライセンス)
+
+### VTT 書き戻しの失敗対象確認
+
+`batch_revert_vtt.py` は修正テキストのディレクトリ（`fixed_dir`）に `revert_vtt_failures.json` を保存します。
+失敗した元 VTT・修正テキスト・strip テキスト・出力 VTT の絶対パスと失敗理由を記録します。
+一覧は実行ごとに更新され、失敗がなければ空配列になります。
+
+突合できない行がある場合や復元行数が `RESTORED_COUNT_THRESHOLD`（既定値 100）を超える場合、
+`revert_vtt.py` は出力 VTT を作成せず、終了コード 1 を返します。
+バッチは失敗後も残りのファイルを処理し、1 件でも失敗すると終了コード 1 を返します。
+一覧の `fixed_txt` / `strip_txt` を修正して同じバッチコマンドを再実行してください。
+既に出力 VTT が存在する対象はスキップされます。
+
+検証: `python -m unittest discover -s batch_st/tests -p 'test_revert_vtt_issue1.py'`
