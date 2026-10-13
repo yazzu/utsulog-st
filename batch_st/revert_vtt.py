@@ -3,7 +3,7 @@ import sys
 import os
 import re
 
-RESTORED_COUNT_THRESHOLD = os.getenv("RESTORED_COUNT_THRESHOLD", 100)
+RESTORED_COUNT_THRESHOLD = int(os.getenv("RESTORED_COUNT_THRESHOLD", "100"))
 
 def parse_tagged_file(path):
     """
@@ -34,10 +34,10 @@ def parse_tagged_file(path):
 def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
     if not os.path.exists(original_vtt_path):
         print(f"Error: VTT file {original_vtt_path} not found.")
-        return
+        return False
     if not os.path.exists(fixed_txt_path):
         print(f"Error: Text file {fixed_txt_path} not found.")
-        return
+        return False
 
     basename = os.path.splitext(os.path.basename(original_vtt_path))[0]
     fixed_dir = os.path.dirname(os.path.abspath(fixed_txt_path))
@@ -45,7 +45,7 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
     
     if os.path.exists(output_vtt_path):
         print(f"Error: Output file {output_vtt_path} already exists.")
-        return
+        return False
 
     # Infer strip path if not provided
     if not strip_txt_path:
@@ -54,20 +54,20 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
     strip_map = {}
     if os.path.exists(strip_txt_path):
         strip_map = parse_tagged_file(strip_txt_path)
-        if strip_map is None: return # Error reading
+        if strip_map is None: return False # Error reading
     else:
         print(f"Error: Strip file {strip_txt_path} not found.")
-        return
+        return False
 
     fixed_map = parse_tagged_file(fixed_txt_path)
-    if fixed_map is None: return
+    if fixed_map is None: return False
 
     # Read original VTT
     try:
         vtt = webvtt.read(original_vtt_path)
     except Exception as e:
         print(f"Error reading VTT file: {e}")
-        return
+        return False
 
     updated_count = 0
     restored_count = 0
@@ -101,9 +101,13 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
             # This implies the strip file provided doesn't match the VTT or something is wrong.
             skipped_count += 1
 
+    if skipped_count:
+        print(f"ERROR: Unmatched lines ({skipped_count}) in VTT: {original_vtt_path}")
+        return False
+
     if restored_count > RESTORED_COUNT_THRESHOLD:
         print(f"WARNING: Too many restored lines ({restored_count} > {RESTORED_COUNT_THRESHOLD}).skipped:{fixed_txt_path}")
-        return
+        return False
 
     vtt.save(output_vtt_path)
     print(f"Saved to {output_vtt_path}")
@@ -111,10 +115,12 @@ def revert_vtt(original_vtt_path, fixed_txt_path, strip_txt_path=None):
     print(f"Updated lines: {updated_count}")
     print(f"Restored lines: {restored_count}")
     print(f"Skipped/Unchanged lines: {skipped_count}")
+    return True
 
 if __name__ == "__main__":
-    if len(sys.argv) < 3:
+    if len(sys.argv) not in (3, 4):
         print("Usage: python revert_vtt.py <original_vtt> <fixed_txt> [strip_txt]")
+        sys.exit(2)
     else:
         strip_arg = sys.argv[3] if len(sys.argv) > 3 else None
-        revert_vtt(sys.argv[1], sys.argv[2], strip_arg)
+        sys.exit(0 if revert_vtt(sys.argv[1], sys.argv[2], strip_arg) else 1)
